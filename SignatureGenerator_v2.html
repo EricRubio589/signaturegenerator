@@ -1,46 +1,82 @@
+
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Signature Generator</title>
 <style>
 body{font-family:Arial;margin:20px;background:#f3f3f3}
 .wrap{display:flex;gap:20px}.card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 6px #ccc}
-label{display:block;margin-top:8px}input{width:300px;padding:6px}
-canvas{border:1px solid #ccc}
-button{margin-top:12px;padding:8px 14px}
+label{display:block;margin-top:8px}input{width:320px;padding:6px}
+canvas{border:1px solid #ccc}button{margin-top:12px;padding:8px 14px}
 </style></head><body>
 <div class="wrap">
 <div class="card">
-<label>Name<input id=n value="Eric Rubio"></label>
-<label>Title<input id=t value="Telecom Infrastructure Specialist"></label>
-<label>Email<input id=e value="erubio@eisd.org"></label>
-<label>Phone<input id=p value="817-615-3600"></label>
+<label>Name<input id="n" value="Eric Rubio"></label>
+<label>Title<input id="t" value="Telecom Infrastructure Specialist"></label>
+<label>Email<input id="e" value="erubio@eisd.org"></label>
+<label>Phone<input id="p" value="817-615-3600"></label>
+<label>Address<input id="a" value="1520 Everman Parkway, Fort Worth, TX 76140"></label>
 <button onclick="draw()">Generate</button>
 <button onclick="download()">Download PNG</button>
-<p>Replace logo.png with your official EISD logo in the same folder for best results.</p>
 </div>
-<div class="card"><canvas id=c width=900 height=340></canvas></div>
+<div class="card"><canvas id="c" width="900" height="340"></canvas></div>
 </div>
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const logo=new Image();logo.src='logo.png';logo.onload=draw;logo.onerror=draw;
-['n','t','e','p'].forEach(id=>document.getElementById(id).oninput=draw);
-function fit(text,max,size,bold=false){ctx.font=(bold?'bold ':'')+size+'px Arial';while(ctx.measureText(text).width>max&&size>10){size--;ctx.font=(bold?'bold ':'')+size+'px Arial';}return size;}
-function draw(){
-ctx.clearRect(0,0,cv.width,cv.height);ctx.fillStyle='white';ctx.fillRect(0,0,cv.width,cv.height);
-if(logo.complete&&logo.naturalWidth)ctx.drawImage(logo,20,20,260,260);else{ctx.strokeRect(20,20,260,260);ctx.font='20px Arial';ctx.fillStyle='#666';ctx.fillText('Place logo.png here',45,155);}
-ctx.strokeStyle='#49308a';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(310,20);ctx.lineTo(310,280);ctx.stroke();
-let x=350,y=60;
-let name=n.value,s=fit(name,500,34,true);ctx.font='bold '+s+'px Arial';ctx.fillStyle='#49308a';ctx.fillText(name,x,y);
-ctx.font='bold 24px Arial';ctx.fillText('Everman ISD',x,y+40);
-let ts=fit(t.value,500,20);ctx.font=ts+'px Arial';ctx.fillText(t.value,x,y+70);
-ctx.font='18px Arial';ctx.fillText(e.value,x,190);ctx.fillText(p.value,x,220);
-ctx.fillText('1520 Everman Parkway,',x,250);ctx.fillText('Fort Worth, TX 76140',x,278);
-ctx.font='italic 28px Georgia';ctx.fillText('One Goal... One Purpose... Student Success!',140,325);
+['n','t','e','p','a'].forEach(id=>document.getElementById(id).oninput=draw);
+
+function fit(txt,max,size,bold){
+  ctx.font=(bold?'bold ':'')+size+'px Arial';
+  while(ctx.measureText(txt).width>max&&size>10){
+    size--;
+    ctx.font=(bold?'bold ':'')+size+'px Arial';
+  }
+  return size;
 }
-function download(){draw();const link=document.createElement('a');
-link.download='signature.png';
-link.href=cv.toDataURL('image/png');
-document.body.appendChild(link);
-link.click();
-setTimeout(()=>document.body.removeChild(link),0);}
+
+function draw(){
+ ctx.clearRect(0,0,900,340);
+ ctx.fillStyle='white';ctx.fillRect(0,0,900,340);
+ if(logo.complete&&logo.naturalWidth){ctx.drawImage(logo,20,20,260,260);}
+ else{ctx.strokeRect(20,20,260,260);ctx.font='20px Arial';ctx.fillStyle='#666';ctx.fillText('Place logo.png here',45,155);}
+ ctx.strokeStyle='#49308a';ctx.lineWidth=3;
+ ctx.beginPath();ctx.moveTo(310,20);ctx.lineTo(310,280);ctx.stroke();
+
+ let x=350,y=60;
+ ctx.fillStyle='#49308a';
+ ctx.font='bold '+fit(n.value,500,34,true)+'px Arial';
+ ctx.fillText(n.value,x,y);
+ ctx.font='bold 24px Arial';ctx.fillText('Everman ISD',x,y+40);
+ ctx.font=fit(t.value,500,20,false)+'px Arial';ctx.fillText(t.value,x,y+70);
+ ctx.font='18px Arial';
+ ctx.fillText(e.value,x,190);
+ ctx.fillText(p.value,x,220);
+
+ let addr=a.value.trim();
+ let line1="", line2="";
+ if(addr.includes(",")){
+   const idx=addr.indexOf(",");
+   line1=addr.substring(0,idx+1).trim();
+   line2=addr.substring(idx+1).trim();
+ }else{
+   const parts=addr.split(" ");
+   const mid=Math.ceil(parts.length/2);
+   line1=parts.slice(0,mid).join(" ");
+   line2=parts.slice(mid).join(" ");
+ }
+ ctx.fillText(line1,x,250);
+ ctx.fillText(line2,x,278);
+
+ ctx.font='italic 28px Georgia';
+ ctx.fillText('One Goal... One Purpose... Student Success!',140,325);
+}
+function download(){
+ draw();
+ const l=document.createElement('a');
+ l.download='signature.png';
+ l.href=cv.toDataURL('image/png');
+ document.body.appendChild(l);
+ l.click();
+ l.remove();
+}
 draw();
 </script></body></html>
